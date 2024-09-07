@@ -1,5 +1,9 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { faker } from "@faker-js/faker";
+//? Tips to optimize your context in case:- three things are true at the same time
+//? 1. The state in the context needs to update all the time
+//? 2. The context has many consumer
+//? 3. App is slow and laggy
 
 // const PostProvider = createContext();
 const PostContext = createContext();
@@ -30,19 +34,16 @@ function PostProvider({ children }) {
   function handleClearPosts() {
     setPosts([]);
   }
-  return (
-    <PostContext.Provider
-      value={{
-        posts: searchedPosts,
-        onAddPost: handleAddPost,
-        onClearPosts: handleClearPosts,
-        searchQuery,
-        setSearchQuery,
-      }}
-    >
-      {children}
-    </PostContext.Provider>
-  );
+  const value = useMemo(() => {
+    return {
+      posts: searchedPosts,
+      onAddPost: handleAddPost,
+      onClearPosts: handleClearPosts,
+      searchQuery,
+      setSearchQuery,
+    };
+  }, [searchQuery, searchedPosts]);
+  return <PostContext.Provider value={value}>{children}</PostContext.Provider>;
 }
 
 function usePost() {
